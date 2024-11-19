@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentry平台错误收集</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+<body>
+    <div id="vueApp">{{message}}</div>
+    <div id="reactApp">react</div>
+</body>
+<script>
+    /**
+     * 捕获未处理的promise.reject
+     */
+    window.addEventListener('unhandledrejection', (err) => {
+        console.log(err, '未捕获promise错误');
+    })
+    /**
+     * 捕获全局的错误
+     */
+    window.addEventListener('error', (err) => {
+        console.log(err, '全局捕获的错误');
+    })
+    // console.log(a);
+    /**
+     * 重写setTimeout
+     */
+    const timeout = window.setTimeout;
+    window.setTimeout = function (fn, time) {
+        timeout(() => {
+            try {
+                fn()
+            } catch (error) {
+                console.log('上报定时器中的错误')
+            }
+        }, time);
+    }
+    setTimeout(() => {
+        console.log(a, '报错');
+    }, 1000);
+    /**
+     * axios响应拦截器
+     */
+    axios.interceptors.response.use(() => { }, function (error) {
+        console.log(error, 'axios响应拦截器中拦截错误');
+    })
+    axios.get("http://localhost:5500/undefined").then(res => {
+        console.log(res, '返回');
+    })
+    /**
+     * Vue.config.errorHandler全部捕获错误
+     */
+    const vueApp = Vue.createApp({
+        setup() {
+            const message = Vue.ref("你好Vue");
+            console.log(noExitArgument);
+            return { message };
+        }
+    })
+    vueApp.config.errorHandler = function (err) {
+        console.log(err, 'Vue中收集到错误');
+    }
+    vueApp.mount("#vueApp")
+    /**
+     * React中捕获错误
+     */
+    function Button() {
+        try {
+            const [text, setText] = React.useState('点击报错');
+            console.log(noExitArgument);
+            return React.createElement(
+                'button',
+                {
+                    onClick: () => {
+                        setText('点击过了')
+                    }
+                },
+                text
+            );
+        } catch (error) {
+            console.log(error, 'React中捕获到错误');
+            return React.createElement('h1',{},"React中捕获到错误")
+        }
+    }
+    const rootNode = document.getElementById('reactApp');
+    const root = ReactDOM.createRoot(rootNode);
+    root.render(React.createElement(Button));
+</script>
+
+</html>
