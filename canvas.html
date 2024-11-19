@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>测试页面</title>
+  </head>
+  <body>
+    <button id="btn">保存</button>
+    <canvas
+      id="signature-pad"
+      width="400"
+      height="200"
+      style="background-color: aliceblue"
+    ></canvas>
+    <canvas
+      id="canvas2"
+      width="400"
+      height="200"
+      style="background-color: antiquewhite"
+    ></canvas>
+    <script>
+      const canvas = document.getElementById('signature-pad')
+      const ctx = canvas.getContext('2d')
+      //在画布上监听鼠标按下
+      let strokes = []
+      let stroking = false
+      canvas.addEventListener('mousedown', (e) => {
+        stroking = true
+        strokes.push(getPosition(e.x, e.y))
+        ctx.beginPath()
+      })
+      canvas.addEventListener('mousemove', (e) => {
+        if (!stroking) return
+        //链接
+        const position = getPosition(e.x, e.y)
+        ctx.lineTo(position.x, position.y)
+        //推送
+        ctx.stroke()
+        strokes.push(getPosition(e.x, e.y))
+      })
+      canvas.addEventListener('mouseup', (e) => {
+        stroking = false
+        strokes.push(false)
+        ctx.closePath()
+      })
+      function getPosition(x, y) {
+        return {
+          x: x - canvas.getBoundingClientRect().left,
+          y: y - canvas.getBoundingClientRect().top
+        }
+      }
+      document.getElementById('btn').onclick = function (e) {
+        save()
+      }
+      const canvas2 = document.getElementById('canvas2')
+      const ctx2 = canvas2.getContext('2d')
+      function save() {
+        ctx2.beginPath()
+        for (let i = 0; i < strokes.length; i++) {
+          const item = strokes[i]
+          if (item === false) {
+            //代表断开
+            ctx2.stroke()
+            ctx2.closePath()
+            ctx2.beginPath()
+          }
+          ctx2.lineTo(item.x, item.y)
+        }
+        console.log('保存')
+        ctx2.stroke()
+      }
+    </script>
+  </body>
+</html>
