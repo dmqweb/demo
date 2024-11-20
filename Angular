@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angular</title>
+    <style>
+        .my-component {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        .my-component .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .my-component .message {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .my-component .buttons button {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .my-component .buttons button:hover {
+            background: #ddd;
+        }
+        .my-component .buttons button:active {
+            background: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="my-component">
+            <div class="container">
+                <p class="message">Count: <span ng-bind="count"></span></p>
+                <div class="buttons">
+                    <button ng-click="increment">Increment</button>
+                    <button ng-click="decrement">Decrease</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function reactive(data) {
+            const listeners = [];
+            const proxy = new Proxy(data, {
+                set(target, property, value) {
+                    target[property] = value;
+                    listeners.forEach(listener => listener());
+                    return true;
+                }
+            });
+            proxy.subscribe = function (listener) {
+                listeners.push(listener);
+            };
+            return proxy;
+        }
+        function myAngularApp(rootElement, controller) {
+            const data = reactive(controller.data());
+            for (const key in controller.methods) {
+                data[key] = function () {
+                    controller.methods[key].call(data); 
+                    data.notify(); 
+                };
+            }
+            data.notify = function () {
+                compile(rootElement);
+            };
+            function compile(element) {
+                const bindElements = element.querySelectorAll('[ng-bind]');
+                const clickElements = element.querySelectorAll('[ng-click]');
+                bindElements.forEach(el => {
+                    const property = el.getAttribute('ng-bind');
+                    el.textContent = data[property];
+                });
+                clickElements.forEach(el => {
+                    const methodName = el.getAttribute('ng-click');
+                    el.onclick = data[methodName]; 
+                });
+            }
+            compile(rootElement);
+            data.subscribe(() => compile(rootElement)); 
+        }
+        const MyController = {
+            data() {
+                return { count: 0 };
+            },
+            methods: {
+                increment() {
+                    this.count++;
+                },
+                decrement() {
+                    this.count--;
+                }
+            }
+        };
+        document.addEventListener('DOMContentLoaded', function () {
+            const rootElement = document.getElementById('app');
+            myAngularApp(rootElement, MyController);
+        });
+    </script>
+</body>
+
+</html>
