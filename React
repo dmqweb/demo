@@ -184,6 +184,42 @@
         document.body.appendChild(root);
         const App = MyComponent();
         App.render();
+        //添加组件样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .my-component {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 50px;
+                background: #f0f0f0;
+            }
+            .my-component .container {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            .my-component .message {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            .my-component .buttons button {
+                font-size: 16px;
+                padding: 10px 20px;
+                margin: 5px;
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                transition: background 0.3s;    
+            }
+            .my-component .buttons button:hover {
+                background: #ddd;
+            }
+            .my-component .buttons button:active {
+                background: #ccc;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 
