@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Angular</title>
     <style>
+        /* 在Angular项目中，css直接声明定义，而不是和组件绑定？？？ */
         .my-component {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -52,60 +52,65 @@
         </div>
     </div>
     <script>
-        function reactive(data) {
-            const listeners = [];
-            const proxy = new Proxy(data, {
-                set(target, property, value) {
-                    target[property] = value;
-                    listeners.forEach(listener => listener());
-                    return true;
+        const controller = {
+            data(){
+                return {
+                    count:0
                 }
-            });
-            proxy.subscribe = function (listener) {
-                listeners.push(listener);
-            };
+            },methods:{
+                increment(){ this.count++; },
+                decrement(){ this.count--; }
+            }
+        }
+    </script>
+    <script>
+        let currentCompile;
+        function reactive(data) {
+            const effectName = new Set();const effect = [];
+            const proxy = new Proxy(data,{
+                get(target,key){
+                    if(!effectName.has(currentCompile.name)){
+                        effectName.add(currentCompile.name);
+                        effect.push(currentCompile);
+                    }
+                    return Reflect.get(target,key);
+                },
+                set(target,key,value){
+                    const res = Reflect.set(target,key,value);
+                    effect.forEach(itemFn=>itemFn.call(target));
+                    return res;
+                }
+            })
             return proxy;
         }
-        function myAngularApp(rootElement, controller) {
+        function myAngular(rootDom,controller) {
             const data = reactive(controller.data());
-            for (const key in controller.methods) {
+            for(let key in controller.methods){
                 data[key] = function () {
-                    controller.methods[key].call(data); 
-                };
-            }
-            function compile(element) {
-                const bindElements = element.querySelectorAll('[ng-bind]');
-                const clickElements = element.querySelectorAll('[ng-click]');
-                bindElements.forEach(el => {
-                    const property = el.getAttribute('ng-bind');
-                    el.textContent = data[property];
-                });
-                clickElements.forEach(el => {
-                    const methodName = el.getAttribute('ng-click');
-                    el.onclick = data[methodName]; 
-                });
-            }
-            compile(rootElement);
-            data.subscribe(() => compile(rootElement)); 
-        }
-        const MyController = {
-            data() {
-                return { count: 0 };
-            },
-            methods: {
-                increment() {
-                    this.count++;
-                },
-                decrement() {
-                    this.count--;
+                    controller.methods[key].call(data)
                 }
             }
-        };
-        document.addEventListener('DOMContentLoaded', function () {
-            const rootElement = document.getElementById('app');
-            myAngularApp(rootElement, MyController);
-        });
+            compile(rootDom);
+            function compile(dom) {
+                updateText(dom.querySelectorAll("[ng-bind]"));
+                const eventDom = dom.querySelectorAll("[ng-click]");
+                eventDom.forEach(item=>{
+                    const eventName = item.getAttribute("ng-click");
+                    item.addEventListener("click",data[eventName]);
+                })
+            }
+            function updateText(doms) {
+                currentCompile = updateText.bind(window,doms)
+                doms.forEach(item=>{
+                    const dataName = item.getAttribute("ng-bind");
+                    item.innerText = data[dataName];
+                })
+            }
+        }
+        document.addEventListener("DOMContentLoaded",function () {
+            const app = document.getElementById("app");
+            myAngular(app,controller);
+        })
     </script>
 </body>
-
 </html>
