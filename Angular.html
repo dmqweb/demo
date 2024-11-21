@@ -71,12 +71,8 @@
             for (const key in controller.methods) {
                 data[key] = function () {
                     controller.methods[key].call(data); 
-                    data.notify(); 
                 };
             }
-            data.notify = function () {
-                compile(rootElement);
-            };
             function compile(element) {
                 const bindElements = element.querySelectorAll('[ng-bind]');
                 const clickElements = element.querySelectorAll('[ng-click]');
