@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>媒体查询监听事件</title>
+  </head>
+  <body>
+    <script>
+      const mediaQuery = matchMedia('(min-width:600px)'); //注意有括号
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', () => {
+          console.log('改变');
+        });
+      } else {
+        mediaQuery.addListener('change', () => {
+          console.log('变化');
+        });
+      }
+    </script>
+  </body>
+</html>
