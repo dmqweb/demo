@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Tensorflow.js</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+	<h1>使用 Tensorflow.js 在 JavaScript 中定义、训练和运行机器学习模型</h1>
+	<section class="data-inputs">
+		<h3>鸢尾花分类</h3>
+		<p>正在训练中...</p>
+		<p class="training-steps"></p>
+		<div class="input-block">
+			<label for="sepal-length">Sepal lenth:</label>
+			<input name="sepal-length" type="number" min="0" max="100" placeholder="1.5">
+		</div>
+
+		<div class="input-block">
+			<label for="sepal-width">Sepal width:</label>
+			<input name="sepal-width" type="number" min="0" max="100" placeholder="0.4">
+		</div>
+
+		<div class="input-block">
+			<label for="petal-length">Petal length:</label>
+			<input name="petal-length" type="number" min="0" max="100" placeholder="1.0">
+		</div>
+
+		<div class="input-block">
+			<label for="petal-width">Petal width:</label>
+			<input name="petal-width" type="number" min="0" max="100" placeholder="0.7">
+		</div>
+
+		<button class="predict" disabled>预测</button>
+	</section>
+	<section class="prediction-block">
+		<p>鸢尾花 预测:</p>
+		<p class="prediction"></p>
+	</section>
+	<!-- <script type="module" src="./src/index.js"></script> -->
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
